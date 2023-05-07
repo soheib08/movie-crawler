@@ -1,8 +1,8 @@
 export class PaginationUrl {
-  constructor(url: string, site: string){
+  constructor(url: string, site: string, isVisited: boolean){
     this.site = site
     this.url = url
-    this.is_visited = false
+    this.is_visited = isVisited
     this.createdAt = new Date()
   }
   id:string

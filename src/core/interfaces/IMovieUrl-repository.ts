@@ -6,7 +6,7 @@ export interface IMovieUrlRepository extends IGenericRepository<MovieUrl> {
 
   createOne(entity: MovieUrl): Promise<MovieUrl>;
 
-  updateOne(id: string, entity: MovieUrl): void;
+  updateOne(id: string, entity: MovieUrl): Promise<void>;
 
   find(): Promise<MovieUrl[]>;
 

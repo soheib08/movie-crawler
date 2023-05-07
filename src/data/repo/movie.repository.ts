@@ -17,9 +17,9 @@ export class MovieRepository implements IMovieRepository {
     return await this.movieModel.find().lean();
   }
 
-  async findOne(id: string) {
+  async findOne(name: string) {
     return await this.movieModel.findOne({
-      _id: id,
+      name: name,
     });
   }
 

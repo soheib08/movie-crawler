@@ -2,8 +2,16 @@ export class Movie {
   id:string
   name: string;
   description: string;
-  genre: string;
+  genre: Array<string>;
+  languages: Array<string>; 
+  qualities: Array<string>;
+  countries: Array<string>;
+  stars:  Array<string>;
+  directors: Array<string>;
   images: Array<string>;
   download_links: Array<string>;
-  createdAt: string;
+  date: string;
+  imdb_score: string
+  rotten_score: string
+  video_links: Array<string>;
 }

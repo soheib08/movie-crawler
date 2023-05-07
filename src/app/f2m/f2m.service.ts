@@ -12,6 +12,7 @@ import { F2MDataExtractor } from './f2m-data-extractor.service';
 import { F2MUrl } from './f2m.constants';
 import { MovieUrlDto } from 'src/core/dto/movie-url.dto';
 import { Movie } from 'src/core/models/movie';
+import { IMovieRepository } from 'src/core/interfaces/IMovie-repository';
 
 @Injectable()
 export class F2MService implements OnModuleInit, ICrawler {
@@ -22,15 +23,17 @@ export class F2MService implements OnModuleInit, ICrawler {
     private readonly paginationUrlRepository: IPaginationUrlRepository,
     @Inject(IMovieUrlRepository)
     private readonly movieUrlRepository: IMovieUrlRepository,
+    @Inject(IMovieRepository)
+    private readonly movieRepository: IMovieRepository,
     private readonly httpService: HttpService,
   ) {}
 
-  onModuleInit() {
-    this.logger.debug('start crawl from movie urls...');
-    // this.crawlMoviesFromMovieLinks(2);
+  async onModuleInit() {
+    this.logger.debug('f2m crawler registered');
+    // await this.getMoviesDataJob();
   }
 
-  // @Cron(CronExpression.EVERY_10_MINUTES)
+   @Cron(CronExpression.EVERY_HOUR)
   async siteIndexJob() {
     this.logger.debug('start crawling f2m...');
     let foundSite = await this.siteRepository.findOne(F2MUrl);
@@ -49,46 +52,60 @@ export class F2MService implements OnModuleInit, ICrawler {
     console.log('is url exists:', isPaginatedUrlExists);
 
     if (!isPaginatedUrlExists) {
-      let newUrl = new PaginationUrl(F2MUrl, foundSite.id);
+      let newUrl = new PaginationUrl(F2MUrl, foundSite.id, false);
       await this.paginationUrlRepository.createOne(newUrl);
       console.log(F2MUrl, 'pagination url created');
     }
-    const moviesUrls = await this.crawlSite(F2MUrl, 20);
+
+    let visitedUrls = await this.paginationUrlRepository.find();
+    visitedUrls = visitedUrls.filter((element) => {
+      return element.is_visited === true;
+    });
+    console.log('visited urls', visitedUrls.length);
+
+    const moviesUrls = await this.crawlSite(
+      F2MUrl,
+      visitedUrls.map((element) => element.url),
+      50,
+    );
 
     console.log('start importing data...');
     await this.saveSiteCrawledData(moviesUrls, foundSite.url);
     console.log('end of importing data');
   }
 
-  // @Cron(CronExpression.EVERY_30_MINUTES)
+   @Cron(CronExpression.EVERY_10_MINUTES)
   async getMoviesDataJob() {
     this.logger.debug('start crawl from movie urls...');
-    const movies = await this.crawlMovies(2);
+    let foundMovieLinks = await this.movieUrlRepository.find();
+    const movies = await this.crawlMovies(foundMovieLinks, 10);
+    this.logger.debug('start save crawled movies');
     await this.saveMoviesCrawledData(movies);
   }
 
   async crawlSite(
     paginationUrl: string,
+    visitedURLs: Array<string>,
     maxPages = 50,
   ): Promise<Array<MovieUrlDto>> {
     const paginationURLsToVisit = [paginationUrl];
     console.log('paginationURLsToVisit', paginationURLsToVisit.length);
-
-    const visitedURLs = new Array<string>();
-
+    let counter = 0;
     const movies = new Array<MovieUrlDto>();
     console.log('movies count', visitedURLs.length);
 
-    while (
-      paginationURLsToVisit.length !== 0 &&
-      visitedURLs.length <= maxPages
-    ) {
+    while (paginationURLsToVisit.length !== 0 && counter <= maxPages) {
       const currentPaginationUrl = paginationURLsToVisit.pop();
       console.log('current paginate url', currentPaginationUrl);
 
+      if (visitedURLs.includes(currentPaginationUrl)) {
+        this.logger.log(currentPaginationUrl, 'crawled before.....*');
+        break;
+      }
       const data = await this.getUrlData(currentPaginationUrl);
       visitedURLs.push(currentPaginationUrl);
-      console.log('visited count extended with ', currentPaginationUrl);
+      counter += 1;
+      console.log('visited count extended with ', counter);
 
       let dataExtractor = new F2MDataExtractor(data);
       let paginationUrls = dataExtractor.getSitePaginationUrlList();
@@ -105,7 +122,7 @@ export class F2MService implements OnModuleInit, ICrawler {
       let movieUrls = dataExtractor.getPaginationUrlMovieList();
       movieUrls.forEach((movieUrl) => {
         movies.push({ url: movieUrl, pagination_url: currentPaginationUrl });
-        console.log('new movie url created', movieUrl);
+        console.log('new movie url added', movieUrl);
       });
       console.log('========end of iteration============', visitedURLs.length);
     }
@@ -114,28 +131,29 @@ export class F2MService implements OnModuleInit, ICrawler {
     return movies;
   }
 
-  async crawlMovies(maxPages: number): Promise<Array<Movie>> {
-    let foundMovieLinks = await this.movieUrlRepository.find();
-    let visitedURLs = new Array<string>();
-    console.log('movie url count', foundMovieLinks.length);
+  async crawlMovies(
+    movieUrls: Array<MovieUrl>,
+    maxPages: number,
+  ): Promise<Array<Movie>> {
+    let counter = 0;
+    console.log('movie url count', movieUrls.length);
     let movies = new Array<Movie>();
-    for await (const movieUrlItem of foundMovieLinks) {
-      console.log('movie url item', movieUrlItem.url, visitedURLs.length);
-      if (visitedURLs.length >= maxPages) {
+    for await (const movieUrlItem of movieUrls) {
+      console.log('movie url item', movieUrlItem.url, counter);
+      if (counter >= maxPages) {
         this.logger.log('reach limiting...');
         break;
       }
       if (!movieUrlItem.is_visited) {
         console.log('start get movie url information...');
 
-        let movie = new Movie();
-        await this.getMovieInformation(movieUrlItem.url);
+        let movie = await this.getMovieInformation(movieUrlItem.url);
         movieUrlItem.is_visited = true;
         await this.movieUrlRepository.updateOne(
-          movieUrlItem.id.toString(),
+          movieUrlItem.url.toString(),
           movieUrlItem,
         );
-        visitedURLs.push(movieUrlItem.url);
+        counter += 1;
         movies.push(movie);
       }
     }
@@ -156,6 +174,7 @@ export class F2MService implements OnModuleInit, ICrawler {
         let newUrl = new PaginationUrl(
           movieUrlItem.pagination_url,
           foundSite.id,
+          true,
         );
         foundPaginationUrl = await this.paginationUrlRepository.createOne(
           newUrl,
@@ -170,66 +189,78 @@ export class F2MService implements OnModuleInit, ICrawler {
   }
 
   async getMovieInformation(movieUrl: string) {
+    let movie = new Movie();
     const data = await this.getUrlData(movieUrl);
     let dataExtractor = new F2MDataExtractor(data);
 
     //get movie name
-    let movieTitle = dataExtractor.getMovieTitle();
-    console.log('movie title:', movieTitle);
+    movie.name = dataExtractor.getMovieTitle();
+    console.log('movie title:', movie.name);
 
     //get movie genres
-    let movieGenres = dataExtractor.getMovieGenres();
-    console.log('genres:', movieGenres.length);
+    movie.genre = dataExtractor.getMovieGenres();
+    console.log('genres:', movie.genre);
 
     //get scores
-    let movieImdbScore = dataExtractor.getMovieIMScore();
-    console.log('imdb:', movieImdbScore);
+    movie.imdb_score = dataExtractor.getMovieIMScore();
+    console.log('imdb:', movie.imdb_score);
 
-    let rottenTitle = dataExtractor.getMovieRottenScore();
-    console.log('rotten:', rottenTitle);
+    movie.rotten_score = dataExtractor.getMovieRottenScore();
+    console.log('rotten:', movie.rotten_score);
 
     //get movie language
-    let movieLanguages = dataExtractor.getMovieLanguages();
-    console.log('language', movieLanguages.length);
+    movie.languages = dataExtractor.getMovieLanguages();
+    console.log('language', movie.languages);
 
     //qualities
-    let movieQualities = dataExtractor.getMovieQualities();
-    console.log('quality items:', movieQualities.length);
+    movie.qualities = dataExtractor.getMovieQualities();
+    console.log('quality items:', movie.qualities);
 
     //get countries
-    let countries = dataExtractor.getMovieCountries();
-    console.log('country items:', countries.length);
+    movie.countries = dataExtractor.getMovieCountries();
+    console.log('country items:', movie.countries);
 
     //get stars
-    let stars = dataExtractor.getMovieStars();
-    console.log('stars items:', stars.length);
+    movie.stars = dataExtractor.getMovieStars();
+    console.log('stars items:', movie.stars);
 
     //get directors
-    let movieDirectors = dataExtractor.getMovieDirectors();
-    console.log('directors:', movieDirectors.length);
+    movie.directors = dataExtractor.getMovieDirectors();
+    console.log('directors:', movie.directors);
 
     //get posters
-    let moviePosters = dataExtractor.getMoviePosters();
-    console.log('posters:', moviePosters);
+    movie.images = dataExtractor.getMoviePosters();
+    console.log('posters:', movie.images);
 
     //get download links
-    let downloadLinks = dataExtractor.getMovieDownloadLinks();
-    console.log('download url', downloadLinks.length);
+    movie.download_links = dataExtractor.getMovieDownloadLinks();
+    console.log('download url', movie.download_links.length);
 
     //get movie description
-    let movieDescription = dataExtractor.getMovieDescription();
-    console.log('description:', movieDescription);
+    movie.description = dataExtractor.getMovieDescription();
+    console.log('description:', movie.description);
 
     //get movie date
-    let movieDate = dataExtractor.getMovieDate();
-    console.log('date:', movieDate);
+    movie.date = dataExtractor.getMovieDate();
+    console.log('date:', movie.date);
 
     //get video links
-    let videoLinks = dataExtractor.getMovieVideoLinks();
-    console.log('video links', videoLinks.length);
+    movie.video_links = dataExtractor.getMovieVideoLinks();
+    console.log('video links', movie.video_links.length);
+
+    return movie;
   }
 
-  async saveMoviesCrawledData(movieList: Array<Movie>): Promise<void> {}
+  async saveMoviesCrawledData(movieList: Array<Movie>): Promise<void> {
+    for await (const movie of movieList) {
+      let foundMovie = await this.movieRepository.findOne(movie.name);
+      if (foundMovie) {
+        break;
+      }
+      await this.movieRepository.createOne(movie);
+    }
+    console.log('end of saving movies');
+  }
 
   async getUrlData(url: string): Promise<any> {
     try {

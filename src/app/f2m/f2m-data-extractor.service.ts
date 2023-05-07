@@ -8,7 +8,7 @@ export class F2MDataExtractor implements IDataExtractor {
     this.$ = load(data);
   }
 
-  getPaginationUrlMovieList(): string[] {
+  getSitePaginationUrlList(): string[] {
     let paginationUrls = new Array<string>();
     this.$('.page-number a').each((index, element) => {
       paginationUrls.push(this.$(element).attr('href'));
@@ -16,7 +16,7 @@ export class F2MDataExtractor implements IDataExtractor {
     return paginationUrls;
   }
 
-  getSitePaginationUrlList(): string[] {
+  getPaginationUrlMovieList(): string[] {
     let movieUrls = new Array<string>();
 
     this.$('.m-helper  a').each((index, element) => {

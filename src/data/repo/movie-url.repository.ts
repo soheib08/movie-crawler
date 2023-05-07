@@ -27,9 +27,9 @@ export class MovieUrlRepository implements IMovieUrlRepository {
   }
 
   async updateOne(id: string, movieUrl: MovieUrl) {
-    return await this.movieUrlModel.updateOne(
+     await this.movieUrlModel.updateOne(
       {
-        _id: id,
+        url: id,
       },
       {
         $set: {
