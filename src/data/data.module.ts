@@ -15,6 +15,9 @@ import { IMovieRepository } from 'src/core/interfaces/IMovie-repository';
 import { IMovieUrlRepository } from 'src/core/interfaces/IMovieUrl-repository';
 import { ISiteRepository } from 'src/core/interfaces/ISite-repository';
 import { IPaginationUrlRepository } from 'src/core/interfaces/IPaginationUrl-repository';
+import { IRawMovieRepository } from 'src/core/interfaces/IRawMovie-repository';
+import { RawMovieRepository } from './repo/raw-movie.repository';
+import { RawMovie, RawMovieSchema } from './schemas/raw-movie.schema';
 
 @Module({
   imports: [
@@ -24,12 +27,18 @@ import { IPaginationUrlRepository } from 'src/core/interfaces/IPaginationUrl-rep
       { name: PaginationUrl.name, schema: PaginationUrlSchema },
       { name: MovieUrl.name, schema: MovieUrlSchema },
       { name: Movie.name, schema: MovieSchema },
+      { name: RawMovie.name, schema: RawMovieSchema },
+
     ]),
   ],
   providers: [
     {
       provide: IMovieRepository,
       useClass: MovieRepository,
+    },
+    {
+      provide: IRawMovieRepository,
+      useClass: RawMovieRepository,
     },
     {
       provide: IMovieUrlRepository,
@@ -49,6 +58,7 @@ import { IPaginationUrlRepository } from 'src/core/interfaces/IPaginationUrl-rep
     IPaginationUrlRepository,
     IMovieUrlRepository,
     IMovieRepository,
+    IRawMovieRepository
   ],
 })
 export class DataModule {}

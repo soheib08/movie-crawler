@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { IMovieRepository } from 'src/core/interfaces/IMovie-repository';
 import { Movie } from 'src/data/schemas/movie.schema';
 

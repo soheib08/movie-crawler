@@ -1,8 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { PaginationUrl } from './pagination-url.schema';
 
-export type PaginationUrlDocument = mongoose.HydratedDocument<MovieUrl>;
+export type MovieUrlDocument = mongoose.HydratedDocument<MovieUrl>;
 
 @Schema({ id: true, timestamps: true })
 export class MovieUrl {

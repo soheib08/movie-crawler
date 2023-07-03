@@ -11,8 +11,8 @@ import { Site } from 'src/core/models/site';
 import { F2MDataExtractor } from './f2m-data-extractor.service';
 import { F2MUrl } from './f2m.constants';
 import { MovieUrlDto } from 'src/core/dto/movie-url.dto';
-import { Movie } from 'src/core/models/movie';
-import { IMovieRepository } from 'src/core/interfaces/IMovie-repository';
+import { RawMovie } from 'src/core/models/raw-movie';
+import { IRawMovieRepository } from 'src/core/interfaces/IRawMovie-repository';
 
 @Injectable()
 export class F2MService implements OnModuleInit, ICrawler {
@@ -23,8 +23,8 @@ export class F2MService implements OnModuleInit, ICrawler {
     private readonly paginationUrlRepository: IPaginationUrlRepository,
     @Inject(IMovieUrlRepository)
     private readonly movieUrlRepository: IMovieUrlRepository,
-    @Inject(IMovieRepository)
-    private readonly movieRepository: IMovieRepository,
+    @Inject(IRawMovieRepository)
+    private readonly rawMovieRepository: IRawMovieRepository,
     private readonly httpService: HttpService,
   ) {}
 
@@ -134,10 +134,10 @@ export class F2MService implements OnModuleInit, ICrawler {
   async crawlMovies(
     movieUrls: Array<MovieUrl>,
     maxPages: number,
-  ): Promise<Array<Movie>> {
+  ): Promise<Array<RawMovie>> {
     let counter = 0;
     console.log('movie url count', movieUrls.length);
-    let movies = new Array<Movie>();
+    let movies = new Array<RawMovie>();
     for await (const movieUrlItem of movieUrls) {
       console.log('movie url item', movieUrlItem.url, counter);
       if (counter >= maxPages) {
@@ -189,77 +189,63 @@ export class F2MService implements OnModuleInit, ICrawler {
   }
 
   async getMovieInformation(movieUrl: string) {
-    let movie = new Movie();
+    let movie = new RawMovie();
     const data = await this.getUrlData(movieUrl);
     let dataExtractor = new F2MDataExtractor(data);
 
     //get movie name
     movie.name = dataExtractor.getMovieTitle();
-    console.log('movie title:', movie.name);
 
     //get movie genres
     movie.genre = dataExtractor.getMovieGenres();
-    console.log('genres:', movie.genre);
 
     //get scores
     movie.imdb_score = dataExtractor.getMovieIMScore();
-    console.log('imdb:', movie.imdb_score);
 
     movie.rotten_score = dataExtractor.getMovieRottenScore();
-    console.log('rotten:', movie.rotten_score);
 
     //get movie language
     movie.languages = dataExtractor.getMovieLanguages();
-    console.log('language', movie.languages);
 
     //qualities
     movie.qualities = dataExtractor.getMovieQualities();
-    console.log('quality items:', movie.qualities);
 
     //get countries
     movie.countries = dataExtractor.getMovieCountries();
-    console.log('country items:', movie.countries);
 
     //get stars
     movie.stars = dataExtractor.getMovieStars();
-    console.log('stars items:', movie.stars);
 
     //get directors
     movie.directors = dataExtractor.getMovieDirectors();
-    console.log('directors:', movie.directors);
 
     //get posters
     movie.images = dataExtractor.getMoviePosters();
-    console.log('posters:', movie.images);
 
     //get download links
     movie.download_links = dataExtractor.getMovieDownloadLinks();
-    console.log('download url', movie.download_links.length);
 
     //get movie description
     movie.description = dataExtractor.getMovieDescription();
-    console.log('description:', movie.description);
 
     //get movie date
     movie.date = dataExtractor.getMovieDate();
-    console.log('date:', movie.date);
 
     //get video links
     movie.video_links = dataExtractor.getMovieVideoLinks();
-    console.log('video links', movie.video_links.length);
 
     return movie;
   }
 
-  async saveMoviesCrawledData(movieList: Array<Movie>): Promise<void> {
-    for await (const movie of movieList) {
-      let foundMovie = await this.movieRepository.findOne(movie.name);
+  async saveMoviesCrawledData(movieList: Array<RawMovie>): Promise<void> {
+    for await (const rawMovie of movieList) {
+      let foundMovie = await this.rawMovieRepository.findOne(rawMovie.name);
       if (foundMovie) {
         break;
       }
-      await this.movieRepository.createOne(movie);
+      await this.rawMovieRepository.createOne(rawMovie);
     }
-    console.log('end of saving movies');
+    console.log('end of saving raw movies');
   }
 
   async getUrlData(url: string): Promise<any> {

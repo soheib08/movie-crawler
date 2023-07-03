@@ -1,4 +1,4 @@
-export class Movie {
+export class RawMovie {
   id: string;
   name: string;
   description: string;
@@ -14,4 +14,5 @@ export class Movie {
   imdb_score: string;
   rotten_score: string;
   video_links: Array<string>;
+  is_checked: boolean;
 }

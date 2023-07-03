@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { CreateSiteDto } from 'src/core/dto/create-site.dto';
 import { ISiteRepository } from 'src/core/interfaces/ISite-repository';
 import { Site } from 'src/data/schemas/site.schema';
@@ -22,7 +22,7 @@ export class SiteRepository   implements ISiteRepository {
         url,
     });
   }
-  async updateOne(id: string, updatedEntityDto: Site) {
+  async updateOne(id: string, updatedEntityDto:Partial< Site>) {
     return await this.siteModel.updateOne(
       {
         _id: id,

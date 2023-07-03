@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
-export type MovieDocument = mongoose.HydratedDocument<Movie>;
+export type RawMovieDocument = mongoose.HydratedDocument<RawMovie>;
 
 @Schema({ id: true, timestamps: true })
-export class Movie {
+export class RawMovie {
   @Prop()
   id: string;
 
@@ -49,6 +49,9 @@ export class Movie {
 
   @Prop()
   video_links: Array<string>;
+
+  @Prop()
+  is_checked: boolean
 }
 
-export const MovieSchema = SchemaFactory.createForClass(Movie);
+export const RawMovieSchema = SchemaFactory.createForClass(RawMovie);

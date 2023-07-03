@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import  * as mongoose from 'mongoose';
-import { Site } from './site.schema';
 
 export type PaginationUrlDocument = mongoose.HydratedDocument<PaginationUrl>;
 

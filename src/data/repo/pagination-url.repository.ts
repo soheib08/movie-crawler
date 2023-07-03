@@ -33,7 +33,7 @@ export class PaginationUrlRepository
     });
   }
 
-  async updateOne(url: string, updatedEntityDto: any) {
+  async updateOne(url: string, updatedEntityDto: Partial<PaginationUrl>) {
     return await this.paginationUrlModel.updateOne(
       {
         url,
