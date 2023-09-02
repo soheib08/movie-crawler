@@ -21,7 +21,7 @@ import { RawMovie, RawMovieSchema } from './schemas/raw-movie.schema';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/movie-crawler'),
+    MongooseModule.forRoot('mongodb://mongodb/movie-crawler'),
     MongooseModule.forFeature([
       { name: Site.name, schema: SiteSchema },
       { name: PaginationUrl.name, schema: PaginationUrlSchema },
