@@ -1,20 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { IMovieRepository } from 'src/core/interfaces/IMovie-repository';
+import mongoose, { Model, Types } from 'mongoose';
 import { RawMovie } from '../schemas/raw-movie.schema';
+import { IRawMovieRepository } from 'src/core/interfaces/IRawMovie-repository';
 
 @Injectable()
-export class RawMovieRepository implements IMovieRepository {
-  constructor(@InjectModel(RawMovie.name) private rawMovieModel: Model<RawMovie>) {}
-  
+export class RawMovieRepository implements IRawMovieRepository {
+  constructor(
+    @InjectModel(RawMovie.name) private rawMovieModel: mongoose.Model<RawMovie>,
+  ) {}
+
   async createOne(entity: RawMovie) {
     const createdEntity = new this.rawMovieModel(entity);
     return createdEntity.save();
   }
 
   async find() {
-    return await this.rawMovieModel.find().lean();
+    return (await this.rawMovieModel.find().lean()).map((element) => {
+      return { ...element, id: element._id.toString() };
+    });
   }
 
   async findOne(name: string) {
@@ -24,16 +28,9 @@ export class RawMovieRepository implements IMovieRepository {
   }
 
   async updateOne(id: string, updatedEntityDto: Partial<RawMovie>) {
-    return await this.rawMovieModel.updateOne(
-      {
-        _id: id,
-      },
-      {
-        $set: {
-          ...updatedEntityDto,
-        },
-      },
-    );
+     await this.rawMovieModel.updateOne({
+      name: id,
+    },updatedEntityDto);    
   }
 
   async deleteOne(id: string) {

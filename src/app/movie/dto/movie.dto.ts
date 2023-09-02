@@ -24,6 +24,7 @@ export class CreateMovieDto {
     this.languages = rawMovie.languages
     this.qualities = rawMovie.qualities
     this.countries = rawMovie.countries
+    this.directors = rawMovie.directors
     this.stars = rawMovie.stars
     this.genre = rawMovie.genre
     this.images = rawMovie.images
@@ -31,15 +32,19 @@ export class CreateMovieDto {
     this.imdb_score = rawMovie.imdb_score
     this.rotten_score = rawMovie.rotten_score
     this.video_links = rawMovie.video_links
+    this.download_links = rawMovie.download_links
 
   }
 
-  cleanMovieName(name: string) {
+  cleanMovieName(name: string) {    
     let str = this.removePersianCharacters(name);
-    return str.replace(' ', '-');
+    let trimString = str.trim()
+
+    return trimString
   }
 
   private removePersianCharacters(str: string): string {
+
     const persianPattern =
       /[\u0600-\u06FF\uFB8A\u067E\u0686\u06AF\u200C\u200F]/g;
     return str.replace(persianPattern, '');

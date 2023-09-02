@@ -17,24 +17,27 @@ export class MovieService implements OnModuleInit {
 
   async onModuleInit() {
     this.logger.debug('movie service registered');
+    this.importingMovies();
   }
 
   @Cron(CronExpression.EVERY_HOUR)
   async importingMovies() {
     this.logger.debug('import movie service job starting...');
     let rawMovieList = await this.rawMovieRepository.find();
-    rawMovieList = rawMovieList.filter(
-      (element) => element.is_checked !== false,
-    );
+    rawMovieList = rawMovieList.filter((element) => {
+      return element.is_checked !== true;
+    });
     for await (const rawMovie of rawMovieList) {
       await this.importMovie(rawMovie);
+      rawMovie.is_checked = true;
+      await this.rawMovieRepository.updateOne(rawMovie.name, rawMovie);
     }
-    this.logger.debug('done with importing movies...'); 
+    this.logger.debug('done with importing movies...');
   }
-
   async importMovie(rawMovie: RawMovie) {
     let movieDto = new CreateMovieDto(rawMovie);
     let movie = movieDto.createMovieInstance();
+
     let movieList = await this.movieRepository.find();
     let isMovieExists = movieList.find((element) => {
       return element.name === movie.name;
@@ -42,7 +45,7 @@ export class MovieService implements OnModuleInit {
     if (!isMovieExists) {
       await this.movieRepository.createOne(movie);
     } else {
-      this.logger.debug(`${movie.name} is already exists`); 
+      this.logger.debug(`${movie.name} is already exists`);
     }
   }
 }

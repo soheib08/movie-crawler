@@ -33,7 +33,7 @@ export class F2MService implements OnModuleInit, ICrawler {
     // await this.getMoviesDataJob();
   }
 
-   @Cron(CronExpression.EVERY_HOUR)
+   @Cron(CronExpression.EVERY_30_MINUTES)
   async siteIndexJob() {
     this.logger.debug('start crawling f2m...');
     let foundSite = await this.siteRepository.findOne(F2MUrl);
@@ -78,7 +78,7 @@ export class F2MService implements OnModuleInit, ICrawler {
   async getMoviesDataJob() {
     this.logger.debug('start crawl from movie urls...');
     let foundMovieLinks = await this.movieUrlRepository.find();
-    const movies = await this.crawlMovies(foundMovieLinks, 10);
+    const movies = await this.crawlMovies(foundMovieLinks, 20);
     this.logger.debug('start save crawled movies');
     await this.saveMoviesCrawledData(movies);
   }

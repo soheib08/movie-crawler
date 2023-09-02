@@ -1,4 +1,4 @@
-import { RawMovie } from 'src/data/schemas/raw-movie.schema';
+import { RawMovie } from '../models/raw-movie';
 import { IGenericRepository } from './generic-repository';
 
 export interface IRawMovieRepository extends IGenericRepository<RawMovie> {

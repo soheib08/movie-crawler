@@ -11,5 +11,6 @@ export interface IMovieRepository extends IGenericRepository<Movie> {
   find(): Promise<Movie[]>;
 
   deleteOne(id: string): void;
+  
 }
 export const IMovieRepository = Symbol("IMovieRepository");
