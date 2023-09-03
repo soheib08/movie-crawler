@@ -16,8 +16,13 @@ services:
     container_name: mongodb
     ports:
       - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db   
     networks:
       - my-network
 
 networks:
   my-network:
+
+volumes:
+  mongodb_data: 
