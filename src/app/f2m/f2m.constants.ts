@@ -1,1 +1,1 @@
-export const F2MUrl = 'https://www.f2m.fun/category/film/'
+export const F2MUrl = 'https://www.f2m11.top/category/film/'
