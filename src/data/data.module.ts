@@ -24,7 +24,7 @@ import { SystemErrorRepository } from './repo/system-error.repository';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://crawler_admin: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@mongodb:27017/movie-crawler'),
+    MongooseModule.forRoot('mongodb://crawler_admin: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@localhost:27017/admin'),
     MongooseModule.forFeature([
       { name: Site.name, schema: SiteSchema },
 
