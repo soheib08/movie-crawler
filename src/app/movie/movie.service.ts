@@ -53,7 +53,7 @@ export class MovieService implements OnModuleInit {
       systemError.type = SystemErrorEnum.ImportMovieError;
       systemError.message = `${movie.name} is already exists with name ${isMovieExists.name} and ${isMovieExists.id}`;
       await this.systemErrorRepository.createOne(systemError)
-      this.logger.debug(`${movie.name} is already exists`);
+     // this.logger.debug(`${movie.name} is already exists`);
     }
   }
 }

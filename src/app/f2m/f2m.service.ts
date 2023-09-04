@@ -43,26 +43,26 @@ export class F2MService implements OnModuleInit, ICrawler {
       foundSite = await this.siteRepository.createOne(
         new Site(F2MUrl, siteName),
       );
-      console.log(siteName, 'website created');
+     // console.log(siteName, 'website created');
     }
-    console.log('site is:', foundSite);
+   // console.log('site is:', foundSite);
 
     let isPaginatedUrlExists = await this.paginationUrlRepository.findOne(
       F2MUrl,
     );
-    console.log('is url exists:', isPaginatedUrlExists);
+   // console.log('is url exists:', isPaginatedUrlExists);
 
     if (!isPaginatedUrlExists) {
       let newUrl = new PaginationUrl(F2MUrl, foundSite.id, false);
       await this.paginationUrlRepository.createOne(newUrl);
-      console.log(F2MUrl, 'pagination url created');
+    //  console.log(F2MUrl, 'pagination url created');
     }
 
     let visitedUrls = await this.paginationUrlRepository.find();
     visitedUrls = visitedUrls.filter((element) => {
       return element.is_visited === true;
     });
-    console.log('visited urls', visitedUrls.length);
+ //   console.log('visited urls', visitedUrls.length);
 
     const moviesUrls = await this.crawlSite(
       F2MUrl,
@@ -90,14 +90,14 @@ export class F2MService implements OnModuleInit, ICrawler {
     maxPages = 50,
   ): Promise<Array<MovieUrlDto>> {
     const paginationURLsToVisit = [paginationUrl];
-    console.log('paginationURLsToVisit', paginationURLsToVisit.length);
+  //  console.log('paginationURLsToVisit', paginationURLsToVisit.length);
     let counter = 0;
     const movies = new Array<MovieUrlDto>();
-    console.log('movies count', visitedURLs.length);
+   // console.log('movies count', visitedURLs.length);
 
     while (paginationURLsToVisit.length !== 0 && counter <= maxPages) {
       const currentPaginationUrl = paginationURLsToVisit.pop();
-      console.log('current paginate url', currentPaginationUrl);
+    //  console.log('current paginate url', currentPaginationUrl);
 
       if (visitedURLs.includes(currentPaginationUrl)) {
         this.logger.log(currentPaginationUrl, 'crawled before.....*');
@@ -106,7 +106,7 @@ export class F2MService implements OnModuleInit, ICrawler {
       const data = await this.getUrlData(currentPaginationUrl);
       visitedURLs.push(currentPaginationUrl);
       counter += 1;
-      console.log('visited count extended with ', counter);
+      //console.log('visited count extended with ', counter);
 
       let dataExtractor = new F2MDataExtractor(data);
       let paginationUrls = dataExtractor.getSitePaginationUrlList();
@@ -116,16 +116,16 @@ export class F2MService implements OnModuleInit, ICrawler {
           !paginationURLsToVisit.includes(element)
         ) {
           paginationURLsToVisit.push(element);
-          console.log('new Paginate url added', element);
+        //  console.log('new Paginate url added', element);
         }
       });
 
       let movieUrls = dataExtractor.getPaginationUrlMovieList();
       movieUrls.forEach((movieUrl) => {
         movies.push({ url: movieUrl, pagination_url: currentPaginationUrl });
-        console.log('new movie url added', movieUrl);
+     //   console.log('new movie url added', movieUrl);
       });
-      console.log('========end of iteration============', visitedURLs.length);
+   //   console.log('========end of iteration============', visitedURLs.length);
     }
 
     this.logger.debug('========this crawler round is ended=======');
@@ -137,10 +137,10 @@ export class F2MService implements OnModuleInit, ICrawler {
     maxPages: number,
   ): Promise<Array<RawMovie>> {
     let counter = 0;
-    console.log('movie url count', movieUrls.length);
+   // console.log('movie url count', movieUrls.length);
     let movies = new Array<RawMovie>();
     for await (const movieUrlItem of movieUrls) {
-      console.log('movie url item', movieUrlItem.url, counter);
+    //  console.log('movie url item', movieUrlItem.url, counter);
       if (counter >= maxPages) {
         this.logger.log('reach limiting...');
         break;

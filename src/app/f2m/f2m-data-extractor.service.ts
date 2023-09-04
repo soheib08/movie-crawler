@@ -30,18 +30,18 @@ export class F2MDataExtractor implements IDataExtractor {
     let movieTitle = '';
     this.$('.m-title a').each((index, element) => {
       movieTitle = this.$(element).html();
-      console.log('movie title:', movieTitle);
+     // console.log('movie title:', movieTitle);
     });
     return movieTitle;
   }
 
   getMovieGenres(): string[] {
     let movieGenres = new Array<string>();
-    console.log('genres:');
+ //   console.log('genres:');
     this.$('.m-genres  .val a').each((index, element) => {
       let genre = this.$(element).html();
       movieGenres.push(genre);
-      console.log(genre);
+     // console.log(genre);
     });
     return movieGenres;
   }
@@ -50,7 +50,7 @@ export class F2MDataExtractor implements IDataExtractor {
     let movieImdbScore = '';
     this.$('.imdb_row  .val').each((index, element) => {
       movieImdbScore = this.$(element).html();
-      console.log('imdb:', movieImdbScore);
+    //  console.log('imdb:', movieImdbScore);
     });
 
     return movieImdbScore;
@@ -60,7 +60,7 @@ export class F2MDataExtractor implements IDataExtractor {
     let rottenTitle = '';
     this.$('.meta_row .pt-1').each((index, element) => {
       rottenTitle = this.$(element).html();
-      console.log('rotten:', rottenTitle);
+    //  console.log('rotten:', rottenTitle);
     });
 
     return rottenTitle;
@@ -70,7 +70,7 @@ export class F2MDataExtractor implements IDataExtractor {
     let movieLanguages = new Array<string>();
     this.$('.m-lang  .val').each((index, element) => {
       let movieLang = this.$(element).html();
-      console.log('language', movieLang);
+    //  console.log('language', movieLang);
       movieLanguages.push(movieLang);
     });
 
@@ -79,11 +79,11 @@ export class F2MDataExtractor implements IDataExtractor {
 
   getMovieQualities(): string[] {
     let movieQualities = new Array<string>();
-    console.log('quality items:');
+   // console.log('quality items:');
     this.$('.m-quality  .val').each((index, element) => {
       let qualityItem = this.$(element).html();
       movieQualities.push(qualityItem);
-      console.log(qualityItem);
+   //   console.log(qualityItem);
     });
 
     return movieQualities;
@@ -91,22 +91,22 @@ export class F2MDataExtractor implements IDataExtractor {
 
   getMovieCountries(): string[] {
     let countries = new Array<string>();
-    console.log('country items:');
+  //  console.log('country items:');
     this.$('.m-country  .val').each((index, element) => {
       let countryItem = this.$(element).html();
       countries.push(countryItem);
-      console.log(countryItem);
+   //   console.log(countryItem);
     });
     return countries;
   }
 
   getMovieStars(): string[] {
     let stars = new Array<string>();
-    console.log('stars items:');
+   // console.log('stars items:');
     this.$('.m-stars  .val').each((index, element) => {
       let starItem = this.$(element).html();
       stars.push(starItem);
-      console.log(starItem);
+    //  console.log(starItem);
     });
 
     return stars;
@@ -114,11 +114,11 @@ export class F2MDataExtractor implements IDataExtractor {
 
   getMovieDirectors(): string[] {
     let movieDirectors = new Array<string>();
-    console.log('director:');
+ //   console.log('director:');
     this.$('.m-director  .val').each((index, element) => {
       let director = this.$(element).html();
       movieDirectors.push(director);
-      console.log(director);
+   //   console.log(director);
     });
 
     return movieDirectors;
@@ -126,13 +126,13 @@ export class F2MDataExtractor implements IDataExtractor {
 
   getMoviePosters(): string[] {
     let moviePosters = new Array<string>();
-    console.log('posters:');
+   // console.log('posters:');
     this.$('.movie .m_poster  img').each((index, element) => {
       let foundSrc = element.attributes.find((attr) => {
         return attr.name === 'src';
       });
       moviePosters.push(foundSrc.value);
-      console.log(foundSrc.value);
+     // console.log(foundSrc.value);
     });
 
     return moviePosters;
@@ -146,7 +146,7 @@ export class F2MDataExtractor implements IDataExtractor {
         downloadLinks.push(movieDownloadUrl);
       }
     });
-    console.log('download url', downloadLinks.length);
+  //  console.log('download url', downloadLinks.length);
 
     return downloadLinks;
   }
@@ -155,7 +155,7 @@ export class F2MDataExtractor implements IDataExtractor {
     let movieDescription = '';
     this.$('.m_plot  p').each((index, element) => {
       movieDescription = this.$(element).html();
-      console.log('description:', movieDescription);
+    //  console.log('description:', movieDescription);
     });
 
     return movieDescription;
@@ -165,7 +165,7 @@ export class F2MDataExtractor implements IDataExtractor {
     let movieDate = '';
     this.$('.m-date  time').each((index, element) => {
       movieDate = this.$(element).attr('datetime');
-      console.log('date:', movieDate);
+    //  console.log('date:', movieDate);
     });
 
     return movieDate;
@@ -175,10 +175,10 @@ export class F2MDataExtractor implements IDataExtractor {
     let videoLinks = new Array<string>();
     this.$('source').each((index, element) => {
       let videoLink = this.$(element).attr('src');
-      console.log(videoLink);
+     // console.log(videoLink);
       videoLinks.push(videoLink);
     });
-    console.log('video links', videoLinks.length);
+   // console.log('video links', videoLinks.length);
 
     return videoLinks;
   }
