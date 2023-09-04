@@ -13,6 +13,7 @@ import { F2MUrl } from './f2m.constants';
 import { MovieUrlDto } from 'src/core/dto/movie-url.dto';
 import { RawMovie } from 'src/core/models/raw-movie';
 import { IRawMovieRepository } from 'src/core/interfaces/IRawMovie-repository';
+import { SystemError } from 'src/data/schemas/system-error.schema';
 
 @Injectable()
 export class F2MService implements OnModuleInit, ICrawler {
@@ -78,7 +79,7 @@ export class F2MService implements OnModuleInit, ICrawler {
   async getMoviesDataJob() {
     this.logger.debug('start crawl from movie urls...');
     let foundMovieLinks = await this.movieUrlRepository.find();
-    const movies = await this.crawlMovies(foundMovieLinks, 20);
+    const movies = await this.crawlMovies(foundMovieLinks, 40);
     this.logger.debug('start save crawled movies');
     await this.saveMoviesCrawledData(movies);
   }
@@ -240,9 +241,7 @@ export class F2MService implements OnModuleInit, ICrawler {
   async saveMoviesCrawledData(movieList: Array<RawMovie>): Promise<void> {
     for await (const rawMovie of movieList) {
       let foundMovie = await this.rawMovieRepository.findOne(rawMovie.name);
-      if (foundMovie) {
-        break;
-      }
+      if (!foundMovie)
       await this.rawMovieRepository.createOne(rawMovie);
     }
     console.log('end of saving raw movies');

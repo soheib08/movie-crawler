@@ -4,6 +4,8 @@ import { IMovieRepository } from 'src/core/interfaces/IMovie-repository';
 import { IRawMovieRepository } from 'src/core/interfaces/IRawMovie-repository';
 import { RawMovie } from 'src/core/models/raw-movie';
 import { CreateMovieDto } from './dto/movie.dto';
+import { SystemError, SystemErrorEnum } from 'src/core/models/system-error';
+import { ISystemErrorRepository } from 'src/core/interfaces/ISystem-error-repository';
 
 @Injectable()
 export class MovieService implements OnModuleInit {
@@ -13,6 +15,8 @@ export class MovieService implements OnModuleInit {
     private readonly movieRepository: IMovieRepository,
     @Inject(IRawMovieRepository)
     private readonly rawMovieRepository: IRawMovieRepository,
+    @Inject(ISystemErrorRepository)
+    private readonly systemErrorRepository: ISystemErrorRepository,
   ) {}
 
   async onModuleInit() {
@@ -20,7 +24,7 @@ export class MovieService implements OnModuleInit {
     this.importingMovies();
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async importingMovies() {
     this.logger.debug('import movie service job starting...');
     let rawMovieList = await this.rawMovieRepository.find();
@@ -45,6 +49,10 @@ export class MovieService implements OnModuleInit {
     if (!isMovieExists) {
       await this.movieRepository.createOne(movie);
     } else {
+      let systemError = new SystemError();
+      systemError.type = SystemErrorEnum.ImportMovieError;
+      systemError.message = `${movie.name} is already exists with name ${isMovieExists.name} and ${isMovieExists.id}`;
+      await this.systemErrorRepository.createOne(systemError)
       this.logger.debug(`${movie.name} is already exists`);
     }
   }
